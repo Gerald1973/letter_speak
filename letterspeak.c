@@ -15,6 +15,7 @@ int main(void)
   noecho();
   keypad(stdscr, TRUE);
   start_color();
+  raw();
 
   bool hasColors = has_colors();
   bool canChangeColor = can_change_color();
