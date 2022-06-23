@@ -12,6 +12,8 @@ int main(void)
   int character = 0;
 
   initscr(); /* Start curses mode 		  */
+  noecho();
+  keypad(stdscr, TRUE);
   start_color();
 
   bool hasColors = has_colors();
