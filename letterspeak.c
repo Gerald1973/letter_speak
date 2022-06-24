@@ -1,5 +1,3 @@
-/* triangle.c */
-
 #include <curses.h>
 #include <stdlib.h>
 
@@ -9,7 +7,7 @@ void game_guess_the_letter();
 
 int main(void)
 {
-  initscr(); /* Start curses mode 		  */
+  initscr();
   noecho();
   cbreak();
   keypad(stdscr, TRUE);
@@ -20,7 +18,7 @@ int main(void)
   printw("The terminal has color        : %d \n", hasColors);
   printw("The user can modify the color : %d \n", canChangeColor);
   buildMenuWindow();
-  endwin(); /* End curses mode		  */
+  endwin();
   return 0;
 }
 
@@ -60,17 +58,18 @@ void game_letter_speak()
   char screen[2000];
   while (character != KEY_HOME)
   {
-    character = getch(); /* Wait for user input */
     clear();
-    sprintf(str, "espeak -v fr-br -s100 '%c'", character);
+    character = getch(); /* Wait for user input */
     sprintf(str2, "figlet -c '%c'", character);
+    sprintf(str, "espeak-ng -v mb-fr2 -s50 '%c'", character);
     fp = popen(str2, "r");
     while (fgets(screen, sizeof(screen), fp) != NULL)
     {
       printw("%s", screen);
     }
-    system(str);
     refresh();
+    system(str);
+    flushinp();
   }
   buildMenuWindow();
   return;
@@ -92,7 +91,7 @@ void game_guess_the_letter()
     {
       character = 'A' + (rand() % 26);
     }
-    sprintf(str_for_espeak, "espeak -v fr-br -s100 'Appuye sur la lettre %c'", character);
+    sprintf(str_for_espeak, "espeak-ng -v mb-fr2 -s50 'Appuye sur la lettre %c'", character);
     system(str_for_espeak);
     character_from_player = getch();
     if (character_from_player == KEY_HOME)
@@ -101,14 +100,15 @@ void game_guess_the_letter()
     }
     else if (character_from_player == character || character_from_player == character + 32)
     {
-      system("espeak -v fr-br -s100 'Super Louis, tu as trouvé.'");
+      system("espeak-ng -v mb-fr2 -s100 'Super! Louis, tu as trouvé!'");
       retry = FALSE;
     }
     else
     {
-      system("espeak -v fr-br -s100 \"Eh bien Louis, ce n'est pas la bonne lettre, réessaye.\"");
+      system("espeak-ng -v mb-fr2 -s50 \"Eh bien Louis, ce n'est pas la bonne lettre, réessaye.\"");
       retry = TRUE;
     }
+    flushinp();
   };
   buildMenuWindow();
   return;

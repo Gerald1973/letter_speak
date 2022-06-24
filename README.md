@@ -1,6 +1,9 @@
 # letter_speak
 
-A small program with nCurses and eSpeak to echo the letter pressed on the keyboard.
+A small program with nCurses and eSpeak to teach the letter.
 
-1. install espeak
+## Setup procedure
+
+1. install espeak-ng
 2. install figlet
+3. sudo apt install mbrola mbrola-fr2
