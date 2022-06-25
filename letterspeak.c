@@ -58,8 +58,8 @@ void game_letter_speak()
   char screen[2000];
   while (character != KEY_HOME)
   {
+    character = getch();
     clear();
-    character = getch(); /* Wait for user input */
     sprintf(str2, "figlet -c '%c'", character);
     sprintf(str, "espeak-ng -v mb-fr2 -s50 '%c'", character);
     fp = popen(str2, "r");
