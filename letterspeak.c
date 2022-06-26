@@ -12,11 +12,40 @@ void *user_data;
 unsigned int *identifier;
 int buflength = 500, options = 0;
 unsigned int position = 0, position_type = 0, end_position = 0, flags = espeakCHARS_AUTO;
+time_t t;
 
-int speak(char *text);
+char words[][20] = {"Arbre",
+                    "Bébé",
+                    "Couleur",
+                    "Dinosaure",
+                    "Eléphant",
+                    "Fleur",
+                    "Giraffe",
+                    "Hippopotame",
+                    "Iguane",
+                    "Jumelles",
+                    "Kangourou",
+                    "Lampe",
+                    "Montre",
+                    "Nuage",
+                    "Ordinateur",
+                    "Papa",
+                    "Quatre",
+                    "Raisin",
+                    "Serpent",
+                    "Tomate",
+                    "Usine",
+                    "Vache",
+                    "Wagon",
+                    "Xylophone",
+                    "Yacht",
+                    "Zèbre"};
+
+int speak(char *text, int rate);
 
 int main(void)
 {
+  srand((unsigned) time(&t));
   espeak_Initialize(output, buflength, path, options);
   initscr();
   noecho();
@@ -38,9 +67,9 @@ void buildMenuWindow()
   int character = 0;
   WINDOW *my_window = newwin(10, 40, 7, 20);
   keypad(my_window, TRUE);
-  waddstr(my_window, "1   | Letter speak\n");
-  waddstr(my_window, "2   | Guess the letter \n");
-  waddstr(my_window, "END | Quit\n");
+  waddstr(my_window, "1   | Prononce la lettre\n");
+  waddstr(my_window, "2   | Devine la lettre\n");
+  waddstr(my_window, "END | Quitte\n");
   do
   {
     wrefresh(my_window);
@@ -79,7 +108,7 @@ void game_letter_speak()
       printw("%s", screen);
     }
     refresh();
-    speak(str);
+    speak(str, 80);
     flushinp();
   }
   buildMenuWindow();
@@ -90,6 +119,7 @@ void game_guess_the_letter()
 {
   int character = 0;
   int character_from_player = 0;
+  int letterNumber = 0;
   bool continue_game = TRUE;
   bool retry = FALSE;
   char str_for_espeak[80];
@@ -100,10 +130,12 @@ void game_guess_the_letter()
     refresh();
     if (!retry)
     {
-      character = 'A' + (rand() % 26);
+      letterNumber = rand() % 26;
+      character = 'A' + letterNumber;
     }
-    sprintf(str_for_espeak, "Appuye sur la lettre %c", character);
-    speak(str_for_espeak);
+    sprintf(str_for_espeak, "%c comme %s", character, words[letterNumber]);
+    speak(" Appuie sur la lettre ", 100);
+    speak(str_for_espeak, 80);
     character_from_player = getch();
     if (character_from_player == KEY_HOME)
     {
@@ -111,12 +143,12 @@ void game_guess_the_letter()
     }
     else if (character_from_player == character || character_from_player == character + 32)
     {
-      speak("Super! Louis, tu as trouvé!");
+      speak("Super! Louis, tu as trouvé!", 120);
       retry = FALSE;
     }
     else
     {
-      speak("Eh bien Louis, ce n'est pas la bonne lettre, réessaye.");
+      speak("Eh bien Louis, ce n'est pas la bonne lettre, réessaye.", 140);
       retry = TRUE;
     }
     flushinp();
@@ -125,9 +157,9 @@ void game_guess_the_letter()
   return;
 }
 
-int speak(char *text)
+int speak(char *text, int rate)
 {
-  espeak_SetParameter(espeakRATE, 120, 0);
+  espeak_SetParameter(espeakRATE, rate, 0);
   espeak_VOICE voice;
   memset(&voice, 0, sizeof(espeak_VOICE)); // Zero out the voice first
   const char *langNativeString = "fr";     // Set voice by properties
