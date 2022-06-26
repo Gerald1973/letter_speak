@@ -1,12 +1,23 @@
 #include <curses.h>
 #include <stdlib.h>
+#include <string.h>
+#include <espeak-ng/speak_lib.h>
 
 void buildMenuWindow();
 void game_letter_speak();
 void game_guess_the_letter();
+espeak_AUDIO_OUTPUT output = AUDIO_OUTPUT_SYNCH_PLAYBACK;
+char *path = NULL;
+void *user_data;
+unsigned int *identifier;
+int buflength = 500, options = 0;
+unsigned int position = 0, position_type = 0, end_position = 0, flags = espeakCHARS_AUTO;
+
+int speak(char *text);
 
 int main(void)
 {
+  espeak_Initialize(output, buflength, path, options);
   initscr();
   noecho();
   cbreak();
@@ -30,7 +41,7 @@ void buildMenuWindow()
   waddstr(my_window, "1   | Letter speak\n");
   waddstr(my_window, "2   | Guess the letter \n");
   waddstr(my_window, "END | Quit\n");
-  while (character != KEY_END)
+  do
   {
     wrefresh(my_window);
     character = wgetch(my_window);
@@ -45,7 +56,7 @@ void buildMenuWindow()
     default:
       break;
     }
-  }
+  } while (character != KEY_END);
   return;
 }
 
@@ -61,20 +72,20 @@ void game_letter_speak()
     character = getch();
     clear();
     sprintf(str2, "figlet -c '%c'", character);
-    sprintf(str, "espeak-ng -v mb-fr2 -s50 '%c'", character);
+    sprintf(str, "%c", character);
     fp = popen(str2, "r");
     while (fgets(screen, sizeof(screen), fp) != NULL)
     {
       printw("%s", screen);
     }
     refresh();
-    system(str);
+    speak(str);
     flushinp();
   }
   buildMenuWindow();
   return;
 }
-
+// espeak-ng -v mb-fr2 -s50 'Appuye sur la lettre %c'"
 void game_guess_the_letter()
 {
   int character = 0;
@@ -91,8 +102,8 @@ void game_guess_the_letter()
     {
       character = 'A' + (rand() % 26);
     }
-    sprintf(str_for_espeak, "espeak-ng -v mb-fr2 -s50 'Appuye sur la lettre %c'", character);
-    system(str_for_espeak);
+    sprintf(str_for_espeak, "Appuye sur la lettre %c", character);
+    speak(str_for_espeak);
     character_from_player = getch();
     if (character_from_player == KEY_HOME)
     {
@@ -100,16 +111,31 @@ void game_guess_the_letter()
     }
     else if (character_from_player == character || character_from_player == character + 32)
     {
-      system("espeak-ng -v mb-fr2 -s100 'Super! Louis, tu as trouvé!'");
+      speak("Super! Louis, tu as trouvé!");
       retry = FALSE;
     }
     else
     {
-      system("espeak-ng -v mb-fr2 -s50 \"Eh bien Louis, ce n'est pas la bonne lettre, réessaye.\"");
+      speak("Eh bien Louis, ce n'est pas la bonne lettre, réessaye.");
       retry = TRUE;
     }
     flushinp();
   };
   buildMenuWindow();
   return;
+}
+
+int speak(char *text)
+{
+  espeak_SetParameter(espeakRATE, 120, 0);
+  espeak_VOICE voice;
+  memset(&voice, 0, sizeof(espeak_VOICE)); // Zero out the voice first
+  const char *langNativeString = "fr";     // Set voice by properties
+  voice.languages = langNativeString;
+  voice.name = "mb-fr2";
+  voice.variant = 2;
+  voice.gender = 2;
+  espeak_SetVoiceByProperties(&voice);
+  espeak_Synth(text, buflength, position, position_type, end_position, flags, identifier, user_data);
+  return 0;
 }
