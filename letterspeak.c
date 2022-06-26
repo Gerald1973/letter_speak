@@ -10,7 +10,7 @@ espeak_AUDIO_OUTPUT output = AUDIO_OUTPUT_SYNCH_PLAYBACK;
 char *path = NULL;
 void *user_data;
 unsigned int *identifier;
-int buflength = 500, options = 0;
+int buflength = 50000, options = 0;
 unsigned int position = 0, position_type = 0, end_position = 0, flags = espeakCHARS_AUTO;
 time_t t;
 
@@ -122,8 +122,8 @@ void game_guess_the_letter()
   int letterNumber = 0;
   bool continue_game = TRUE;
   bool retry = FALSE;
-  char str_for_espeak[80];
-  char str_for_figlet[2000];
+  char str_for_letter[80];
+  char str_for_word[80];
   while (continue_game)
   {
     clear();
@@ -133,9 +133,10 @@ void game_guess_the_letter()
       letterNumber = rand() % 26;
       character = 'A' + letterNumber;
     }
-    sprintf(str_for_espeak, "%c comme %s", character, words[letterNumber]);
-    speak(" Appuie sur la lettre ", 100);
-    speak(str_for_espeak, 80);
+    sprintf(str_for_letter,"Appuie sur la lettre %c", character);
+    sprintf(str_for_word," comme %s", words[letterNumber]);
+    speak(str_for_letter, 80);
+    speak(str_for_word, 80);
     character_from_player = getch();
     if (character_from_player == KEY_HOME)
     {
@@ -160,13 +161,11 @@ void game_guess_the_letter()
 int speak(char *text, int rate)
 {
   espeak_SetParameter(espeakRATE, rate, 0);
+  espeak_SetParameter(espeakVOICETYPE,1,0);
+  espeak_SetParameter(espeakVOLUME,95,0);
   espeak_VOICE voice;
   memset(&voice, 0, sizeof(espeak_VOICE)); // Zero out the voice first
-  const char *langNativeString = "fr";     // Set voice by properties
-  voice.languages = langNativeString;
-  voice.name = "mb-fr2";
-  voice.variant = 2;
-  voice.gender = 2;
+  voice.identifier = "mb-fr4";
   espeak_SetVoiceByProperties(&voice);
   espeak_Synth(text, buflength, position, position_type, end_position, flags, identifier, user_data);
   return 0;
