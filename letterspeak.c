@@ -6,12 +6,17 @@
 void buildMenuWindow();
 void game_letter_speak();
 void game_guess_the_letter();
+void buildFunctionBar(WINDOW *window, char *text);
 espeak_AUDIO_OUTPUT output = AUDIO_OUTPUT_SYNCH_PLAYBACK;
 char *path = NULL;
 void *user_data;
 unsigned int *identifier;
 int buflength = 50000, options = 0;
 unsigned int position = 0, position_type = 0, end_position = 0, flags = espeakCHARS_AUTO;
+WINDOW *letterSpeakWindow = NULL;
+WINDOW *guessLetterWindow = NULL;
+WINDOW *menuWindow = NULL;
+
 time_t t;
 
 char words[][20] = {"Arbre",
@@ -45,7 +50,7 @@ int speak(char *text, int rate);
 
 int main(void)
 {
-  srand((unsigned) time(&t));
+  srand((unsigned)time(&t));
   espeak_Initialize(output, buflength, path, options);
   initscr();
   noecho();
@@ -65,22 +70,31 @@ int main(void)
 void buildMenuWindow()
 {
   int character = 0;
-  WINDOW *my_window = newwin(10, 40, 7, 20);
-  keypad(my_window, TRUE);
-  waddstr(my_window, "1   | Prononce la lettre\n");
-  waddstr(my_window, "2   | Devine la lettre\n");
-  waddstr(my_window, "END | Quitte\n");
+  if (menuWindow == NULL) {
+    menuWindow = newwin(10, 40, 7, 20);
+    keypad(menuWindow, TRUE);
+    wborder(menuWindow, '|', '|', '-', '-', '+', '+', '+', '+');
+    wmove(menuWindow, 1, 1);
+    wprintw(menuWindow, " 1    Je prononce la lettre");
+    wmove(menuWindow, 2, 1);
+    wprintw(menuWindow, " 2    Devine la lettre");
+    wmove(menuWindow, 3, 1);
+    wprintw(menuWindow, " END  Quitte");
+  }
+  wrefresh(menuWindow);
   do
   {
-    wrefresh(my_window);
-    character = wgetch(my_window);
+    character = wgetch(menuWindow);
+    flushinp();
     switch (character)
     {
     case '1':
       game_letter_speak();
+      touchwin(menuWindow);
       break;
     case '2':
       game_guess_the_letter();
+      touchwin(menuWindow);
       break;
     default:
       break;
@@ -96,22 +110,32 @@ void game_letter_speak()
   char str[80];
   char str2[80];
   char screen[2000];
+  if (letterSpeakWindow == NULL)
+  {
+    letterSpeakWindow = newwin(0, 0, 0, 0);
+    keypad(letterSpeakWindow, TRUE);
+  }
   while (character != KEY_HOME)
   {
-    character = getch();
-    clear();
-    sprintf(str2, "figlet -c '%c'", character);
-    sprintf(str, "%c", character);
-    fp = popen(str2, "r");
-    while (fgets(screen, sizeof(screen), fp) != NULL)
+    wclear(letterSpeakWindow);
+    buildFunctionBar(letterSpeakWindow, "Je prononce la lettre | Menu (home)");
+    wrefresh(letterSpeakWindow);
+    if (character != 0)
     {
-      printw("%s", screen);
+      wmove(letterSpeakWindow, 0, 0);
+      sprintf(str2, "figlet -c '%c'", character);
+      sprintf(str, "%c", character);
+      fp = popen(str2, "r");
+      while (fgets(screen, sizeof(screen), fp) != NULL)
+      {
+        wprintw(letterSpeakWindow, "%s", screen);
+      }
+      speak(str, 80);
     }
-    refresh();
-    speak(str, 80);
+    character = wgetch(letterSpeakWindow);
     flushinp();
   }
-  buildMenuWindow();
+  wclear(letterSpeakWindow);
   return;
 }
 // espeak-ng -v mb-fr2 -s50 'Appuye sur la lettre %c'"
@@ -124,20 +148,25 @@ void game_guess_the_letter()
   bool retry = FALSE;
   char str_for_letter[80];
   char str_for_word[80];
+  char str_for_error[160];
+  if (guessLetterWindow == NULL){
+    guessLetterWindow = newwin(0,0,0,0);
+    keypad(guessLetterWindow, TRUE);
+  }
   while (continue_game)
   {
-    clear();
-    refresh();
+    buildFunctionBar(guessLetterWindow, "Devine la lettre | Menu (home)");
+    wrefresh(guessLetterWindow);
     if (!retry)
     {
       letterNumber = rand() % 26;
       character = 'A' + letterNumber;
     }
-    sprintf(str_for_letter,"Appuie sur la lettre %c", character);
-    sprintf(str_for_word," comme %s", words[letterNumber]);
+    sprintf(str_for_letter, "Appuie sur la lettre %c", character);
+    sprintf(str_for_word, " comme %s", words[letterNumber]);
     speak(str_for_letter, 80);
     speak(str_for_word, 80);
-    character_from_player = getch();
+    character_from_player = wgetch(guessLetterWindow);
     if (character_from_player == KEY_HOME)
     {
       continue_game = FALSE;
@@ -149,24 +178,47 @@ void game_guess_the_letter()
     }
     else
     {
-      speak("Eh bien Louis, ce n'est pas la bonne lettre, réessaye.", 140);
+      sprintf(str_for_error, "Eh bien Louis, ce n'est pas la bonne lettre, tu as appuyé sur lettre %c, réessaye.", character_from_player);
+      speak(str_for_error, 140);
       retry = TRUE;
     }
     flushinp();
+    wclear(guessLetterWindow);
   };
-  buildMenuWindow();
   return;
 }
 
 int speak(char *text, int rate)
 {
   espeak_SetParameter(espeakRATE, rate, 0);
-  espeak_SetParameter(espeakVOICETYPE,1,0);
-  espeak_SetParameter(espeakVOLUME,95,0);
+  espeak_SetParameter(espeakVOICETYPE, 1, 0);
+  espeak_SetParameter(espeakVOLUME, 95, 0);
   espeak_VOICE voice;
   memset(&voice, 0, sizeof(espeak_VOICE)); // Zero out the voice first
   voice.identifier = "mb-fr4";
   espeak_SetVoiceByProperties(&voice);
   espeak_Synth(text, buflength, position, position_type, end_position, flags, identifier, user_data);
   return 0;
+}
+
+void buildFunctionBar(WINDOW *window, char *text)
+{
+  int x = 0;
+  int y = 0;
+  int gap = 2;
+  char functionBar[2048];
+  getmaxyx(window, y, x);
+  for (int i = 0; i < x; i++)
+  {
+    functionBar[i] = ' ';
+  }
+  for (int i = gap; i < (strlen(text) + gap); i++)
+  {
+    functionBar[i] = text[i - gap];
+  }
+  functionBar[x] = 0;
+  wattron(window, A_REVERSE);
+  wmove(window, y - 2, 0);
+  waddstr(window, functionBar);
+  wattrset(window, A_NORMAL);
 }
