@@ -19,6 +19,14 @@ WINDOW *menuWindow = NULL;
 
 time_t t;
 
+char successSentences[][256] = {
+    "Bravo Louis !",
+    "Génial!",
+    "Tu es super intelligent!",
+    "Continue, tu vas tout savoir !",
+    "Sensationnel, tu connais tout !",
+    "Super! Louis, tu as trouvé!"};
+
 char words[][20] = {"Arbre",
                     "Bébé",
                     "Couleur",
@@ -70,7 +78,8 @@ int main(void)
 void buildMenuWindow()
 {
   int character = 0;
-  if (menuWindow == NULL) {
+  if (menuWindow == NULL)
+  {
     menuWindow = newwin(10, 40, 7, 20);
     keypad(menuWindow, TRUE);
     wborder(menuWindow, '|', '|', '-', '-', '+', '+', '+', '+');
@@ -149,8 +158,9 @@ void game_guess_the_letter()
   char str_for_letter[80];
   char str_for_word[80];
   char str_for_error[160];
-  if (guessLetterWindow == NULL){
-    guessLetterWindow = newwin(0,0,0,0);
+  if (guessLetterWindow == NULL)
+  {
+    guessLetterWindow = newwin(0, 0, 0, 0);
     keypad(guessLetterWindow, TRUE);
   }
   while (continue_game)
@@ -173,7 +183,7 @@ void game_guess_the_letter()
     }
     else if (character_from_player == character || character_from_player == character + 32)
     {
-      speak("Super! Louis, tu as trouvé!", 120);
+      speak(successSentences[rand() % 6], 120);
       retry = FALSE;
     }
     else
