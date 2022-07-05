@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <espeak-ng/speak_lib.h>
+#include "graphism.h"
 
 void buildMenuWindow();
 void game_letter_speak();
@@ -166,6 +167,7 @@ void game_guess_the_letter()
   while (continue_game)
   {
     buildFunctionBar(guessLetterWindow, "Devine la lettre | Menu (home)");
+
     wrefresh(guessLetterWindow);
     if (!retry)
     {

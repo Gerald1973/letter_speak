@@ -1,6 +1,7 @@
 {
     "files.associations": {
         "curses.h": "c",
-        "speak_lib.h": "c"
+        "speak_lib.h": "c",
+        "graphism.h": "c"
     }
 }
