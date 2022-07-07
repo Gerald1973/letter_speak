@@ -1,6 +1,6 @@
 #include <curses.h>
 #include <stdlib.h>
-#include <time.h> 
+#include <time.h>
 #include <string.h>
 #include <espeak-ng/speak_lib.h>
 #include "graphism.h"
@@ -62,7 +62,7 @@ int speak(char *text, int rate);
 
 int main(void)
 {
-  srand((unsigned) time(&t));
+  srand((unsigned)time(&t));
   espeak_Initialize(output, buflength, path, options);
   initscr();
   noecho();
@@ -82,9 +82,14 @@ int main(void)
 void buildMenuWindow()
 {
   int character = 0;
+  int width = 40;
+  int height = 10;
+  int y = 0;
+  int x = 0;
+  getmaxyx(stdscr, y, x);
   if (menuWindow == NULL)
   {
-    menuWindow = newwin(10, 40, 7, 20);
+    menuWindow = newwin(height, width, (y - height) / 2, (x - width) / 2);
     keypad(menuWindow, TRUE);
     wborder(menuWindow, '|', '|', '-', '-', '+', '+', '+', '+');
     wmove(menuWindow, 1, 1);
@@ -217,7 +222,7 @@ void writeLetterInTheCenter(WINDOW *window, char character)
   int x = 0;
   int y = 0;
   getmaxyx(window, y, x);
-  draw_char(letterSpeakWindow, character, x / 2 - 8, y / 2 - 8);
+  draw_char(letterSpeakWindow, character, (x - 8)/ 2 , (y - 8) / 2);
 }
 
 void buildFunctionBar(WINDOW *window, char *text)
