@@ -6,6 +6,7 @@
 #include "characters_c64.h"
 
 void buildMenuWindow();
+void writeLetterInTheCenter(WINDOW *window, char character);
 void game_letter_speak();
 void game_guess_the_letter();
 void buildFunctionBar(WINDOW *window, char *text);
@@ -116,10 +117,8 @@ void buildMenuWindow()
 
 void game_letter_speak()
 {
-  FILE *fp;
   int character = 0;
   char str[80];
-  char str2[80];
   char screen[2000];
   if (letterSpeakWindow == NULL)
   {
@@ -131,7 +130,7 @@ void game_letter_speak()
     wclear(letterSpeakWindow);
     if (character != 0)
     {
-      draw_char(letterSpeakWindow, character, 2, 2);
+      writeLetterInTheCenter(letterSpeakWindow, character);
     }
     buildFunctionBar(letterSpeakWindow, "Je prononce la lettre | Menu (home)");
     wrefresh(letterSpeakWindow);
@@ -139,7 +138,6 @@ void game_letter_speak()
     {
       wmove(letterSpeakWindow, 0, 0);
       sprintf(str, "%c", character);
-      draw_char(letterSpeakWindow, character, 2, 2);
       speak(str, 80);
     }
     character = wgetch(letterSpeakWindow);
@@ -211,6 +209,14 @@ int speak(char *text, int rate)
   espeak_SetVoiceByProperties(&voice);
   espeak_Synth(text, buflength, position, position_type, end_position, flags, identifier, user_data);
   return 0;
+}
+
+void writeLetterInTheCenter(WINDOW *window, char character)
+{
+  int x = 0;
+  int y = 0;
+  getmaxyx(window, y, x);
+  draw_char(letterSpeakWindow, character, x / 2 - 8, y / 2 - 8);
 }
 
 void buildFunctionBar(WINDOW *window, char *text)
