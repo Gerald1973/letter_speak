@@ -129,6 +129,10 @@ void game_letter_speak()
   while (character != KEY_HOME)
   {
     wclear(letterSpeakWindow);
+    if (character != 0)
+    {
+      draw_char(letterSpeakWindow, character, 2, 2);
+    }
     buildFunctionBar(letterSpeakWindow, "Je prononce la lettre | Menu (home)");
     wrefresh(letterSpeakWindow);
     if (character != 0)
