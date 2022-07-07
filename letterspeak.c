@@ -3,6 +3,7 @@
 #include <string.h>
 #include <espeak-ng/speak_lib.h>
 #include "graphism.h"
+#include "characters_c64.h"
 
 void buildMenuWindow();
 void game_letter_speak();
@@ -133,13 +134,8 @@ void game_letter_speak()
     if (character != 0)
     {
       wmove(letterSpeakWindow, 0, 0);
-      sprintf(str2, "figlet -c '%c'", character);
       sprintf(str, "%c", character);
-      fp = popen(str2, "r");
-      while (fgets(screen, sizeof(screen), fp) != NULL)
-      {
-        wprintw(letterSpeakWindow, "%s", screen);
-      }
+      draw_char(letterSpeakWindow, character, 2, 2);
       speak(str, 80);
     }
     character = wgetch(letterSpeakWindow);

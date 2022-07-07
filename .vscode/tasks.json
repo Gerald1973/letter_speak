@@ -9,6 +9,7 @@
                 "-g",
                 "${file}",
                 "graphism.c",
+                "characters_c64.c",
                 "-o",
                 "${fileDirname}/${fileBasenameNoExtension}",
                 "-lespeak-ng",

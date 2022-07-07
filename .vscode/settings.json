@@ -2,6 +2,7 @@
     "files.associations": {
         "curses.h": "c",
         "speak_lib.h": "c",
-        "graphism.h": "c"
+        "graphism.h": "c",
+        "characters_c64.h": "c"
     }
 }
