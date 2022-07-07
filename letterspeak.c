@@ -1,5 +1,6 @@
 #include <curses.h>
 #include <stdlib.h>
+#include <time.h> 
 #include <string.h>
 #include <espeak-ng/speak_lib.h>
 #include "graphism.h"
@@ -61,7 +62,7 @@ int speak(char *text, int rate);
 
 int main(void)
 {
-  srand((unsigned)time(&t));
+  srand((unsigned) time(&t));
   espeak_Initialize(output, buflength, path, options);
   initscr();
   noecho();
