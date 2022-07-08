@@ -363,6 +363,7 @@ void displayPictureForLetter(char character)
         waddch(drawingWindow, tmp);
       }
     }
+    fclose(fptr);
   }
   wrefresh(drawingWindow);
 }
