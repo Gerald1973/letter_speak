@@ -381,6 +381,7 @@ int displayPictureForLetter(WINDOW **me, WINDOW **sub, char character, int heigh
         waddch(*sub, tmp);
       }
     }
+    fclose(fptr);
   }
   wrefresh(*me);
   return 0;
