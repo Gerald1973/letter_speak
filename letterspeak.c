@@ -175,7 +175,6 @@ void game_guess_the_letter()
   }
   while (continue_game)
   {
-    wrefresh(guessLetterWindow);
     if (!retry)
     {
       letterNumber = rand() % 26;
@@ -183,6 +182,7 @@ void game_guess_the_letter()
     }
     displayPictureForLetter(character);
     buildFunctionBar(guessLetterWindow, "Devine la lettre | Menu (home)");
+    wrefresh(guessLetterWindow);
     sprintf(str_for_letter, "Appuie sur la lettre %c", character);
     sprintf(str_for_word, " comme %s", words[letterNumber]);
     speak(str_for_letter, 80);
