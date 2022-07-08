@@ -1,5 +1,5 @@
 #include "graphism.h"
-#include <curses.h>
+#include <ncurses.h>
 
 void graph_plot(WINDOW *window, int x0, int y0)
 {

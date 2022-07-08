@@ -2,7 +2,7 @@
 #define GRAPHISM_H
 
 #include <stdio.h>
-#include <curses.h>
+#include <ncurses.h>
 #include <stdlib.h>
 
 void graph_plot(WINDOW *window, int x0, int y0);

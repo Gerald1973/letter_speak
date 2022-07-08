@@ -1,8 +1,9 @@
-#include <curses.h>
+#include <ncurses.h>
 #include <stdlib.h>
 #include <time.h>
 #include <string.h>
 #include <espeak-ng/speak_lib.h>
+#include <ctype.h>
 #include "graphism.h"
 #include "characters_c64.h"
 
@@ -11,6 +12,8 @@ void writeLetterInTheCenter(WINDOW *window, char character);
 void game_letter_speak();
 void game_guess_the_letter();
 void buildFunctionBar(WINDOW *window, char *text);
+void displayPictureForLetter(char character);
+
 espeak_AUDIO_OUTPUT output = AUDIO_OUTPUT_SYNCH_PLAYBACK;
 char *path = NULL;
 void *user_data;
@@ -20,6 +23,7 @@ unsigned int position = 0, position_type = 0, end_position = 0, flags = espeakCH
 WINDOW *letterSpeakWindow = NULL;
 WINDOW *guessLetterWindow = NULL;
 WINDOW *menuWindow = NULL;
+WINDOW *drawingWindow = NULL;
 
 time_t t;
 
@@ -33,7 +37,7 @@ char successSentences[][256] = {
 
 char words[][20] = {"Arbre",
                     "Bébé",
-                    "Couleur",
+                    "Cadeau",
                     "Dinosaure",
                     "Eléphant",
                     "Fleur",
@@ -140,6 +144,7 @@ void game_letter_speak()
     }
     buildFunctionBar(letterSpeakWindow, "Je prononce la lettre | Menu (home)");
     wrefresh(letterSpeakWindow);
+    displayPictureForLetter(character);
     if (character != 0)
     {
       wmove(letterSpeakWindow, 0, 0);
@@ -170,14 +175,14 @@ void game_guess_the_letter()
   }
   while (continue_game)
   {
-    buildFunctionBar(guessLetterWindow, "Devine la lettre | Menu (home)");
-
     wrefresh(guessLetterWindow);
     if (!retry)
     {
       letterNumber = rand() % 26;
       character = 'A' + letterNumber;
     }
+    displayPictureForLetter(character);
+    buildFunctionBar(guessLetterWindow, "Devine la lettre | Menu (home)");
     sprintf(str_for_letter, "Appuie sur la lettre %c", character);
     sprintf(str_for_word, " comme %s", words[letterNumber]);
     speak(str_for_letter, 80);
@@ -222,7 +227,7 @@ void writeLetterInTheCenter(WINDOW *window, char character)
   int x = 0;
   int y = 0;
   getmaxyx(window, y, x);
-  draw_char(letterSpeakWindow, character, (x - 8)/ 2 , (y - 8) / 2);
+  draw_char(letterSpeakWindow, character, (x - 8) / 2, (y - 8) / 2);
 }
 
 void buildFunctionBar(WINDOW *window, char *text)
@@ -245,4 +250,119 @@ void buildFunctionBar(WINDOW *window, char *text)
   wmove(window, y - 2, 0);
   waddstr(window, functionBar);
   wattrset(window, A_NORMAL);
+}
+
+void displayPictureForLetter(char character)
+{
+  int width = 40;
+  int height = 25;
+  int y = 0;
+  int x = 0;
+  int tmp = 0;
+  char drawing[1025];
+  char fileName[256];
+  if (drawingWindow == NULL)
+  {
+    getmaxyx(stdscr, y, x);
+    drawingWindow = newwin(height, width, (y - height) / 2, (x - 2 - width));
+  }
+  wclear(drawingWindow);
+  int lowerCase = tolower(character);
+  switch (lowerCase)
+  {
+  case 'a':
+    strncpy(fileName, "data/arbre.txt", sizeof(fileName));
+    break;
+  case 'b':
+    strncpy(fileName, "data/bebe.txt", sizeof(fileName));
+    break;
+  case 'c':
+    strncpy(fileName, "data/cadeau.txt", sizeof(fileName));
+    break;
+  case 'd':
+    strncpy(fileName, "data/dinosaure.txt", sizeof(fileName));
+    break;
+  case 'e':
+    strncpy(fileName, "data/elephant.txt", sizeof(fileName));
+    break;
+  case 'f':
+    strncpy(fileName, "data/fleur.txt", sizeof(fileName));
+    break;
+  case 'g':
+    strncpy(fileName, "data/girafe.txt", sizeof(fileName));
+    break;
+  case 'h':
+    strncpy(fileName, "data/hippopotame.txt", sizeof(fileName));
+    break;
+  case 'i':
+    strncpy(fileName, "data/iguane.txt", sizeof(fileName));
+    break;
+  case 'j':
+    strncpy(fileName, "data/jumelles.txt", sizeof(fileName));
+    break;
+  case 'k':
+    strncpy(fileName, "data/kangourou.txt", sizeof(fileName));
+    break;
+  case 'l':
+    strncpy(fileName, "data/lampe.txt", sizeof(fileName));
+    break;
+  case 'm':
+    strncpy(fileName, "data/montre.txt", sizeof(fileName));
+    break;
+  case 'n':
+    strncpy(fileName, "data/nuage.txt", sizeof(fileName));
+    break;
+  case 'o':
+    strncpy(fileName, "data/ordinateur.txt", sizeof(fileName));
+    break;
+  case 'p':
+    strncpy(fileName, "data/papa.txt", sizeof(fileName));
+    break;
+  case 'q':
+    strncpy(fileName, "data/quatre.txt", sizeof(fileName));
+    break;
+  case 'r':
+    strncpy(fileName, "data/raisin.txt", sizeof(fileName));
+    break;
+  case 's':
+    strncpy(fileName, "data/serpent.txt", sizeof(fileName));
+    break;
+  case 't':
+    strncpy(fileName, "data/tomate.txt", sizeof(fileName));
+    break;
+  case 'u':
+    strncpy(fileName, "data/usine.txt", sizeof(fileName));
+    break;
+  case 'v':
+    strncpy(fileName, "data/vache.txt", sizeof(fileName));
+    break;
+  case 'w':
+    strncpy(fileName, "data/wagon.txt", sizeof(fileName));
+    break;
+  case 'x':
+    strncpy(fileName, "data/xylophone.txt", sizeof(fileName));
+    break;
+  case 'y':
+    strncpy(fileName, "data/yacht.txt", sizeof(fileName));
+    break;
+  case 'z':
+    strncpy(fileName, "data/zebre.txt", sizeof(fileName));
+    break;
+  default:
+    strncpy(fileName, "data/other.txt", sizeof(fileName));
+  }
+  
+  FILE *fptr = fopen(fileName, "r");
+  if (fptr != NULL)
+  {
+    for (int i = 0; i < 1025; i++)
+    {
+      tmp = fgetc(fptr);
+      if (tmp != '\n')
+      {
+        waddch(drawingWindow, tmp);
+      }
+    }
+  }
+  wrefresh(drawingWindow);
 }
