@@ -180,9 +180,9 @@ void game_guess_the_letter()
       letterNumber = rand() % 26;
       character = 'A' + letterNumber;
     }
-    displayPictureForLetter(character);
     buildFunctionBar(guessLetterWindow, "Devine la lettre | Menu (home)");
     wrefresh(guessLetterWindow);
+    displayPictureForLetter(character);
     sprintf(str_for_letter, "Appuie sur la lettre %c", character);
     sprintf(str_for_word, " comme %s", words[letterNumber]);
     speak(str_for_letter, 80);
