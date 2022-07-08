@@ -9,10 +9,10 @@
 
 void buildMenuWindow();
 void writeLetterInTheCenter(WINDOW *window, char character);
-void game_letter_speak();
+WINDOW *game_letter_speak();
 void game_guess_the_letter();
 void buildFunctionBar(WINDOW *window, char *text);
-void displayPictureForLetter(char character);
+int displayPictureForLetter(WINDOW **window, WINDOW **sub, char character, int begin_y, int begin_x, int height, int width);
 
 espeak_AUDIO_OUTPUT output = AUDIO_OUTPUT_SYNCH_PLAYBACK;
 char *path = NULL;
@@ -20,10 +20,7 @@ void *user_data;
 unsigned int *identifier;
 int buflength = 50000, options = 0;
 unsigned int position = 0, position_type = 0, end_position = 0, flags = espeakCHARS_AUTO;
-WINDOW *letterSpeakWindow = NULL;
-WINDOW *guessLetterWindow = NULL;
 WINDOW *menuWindow = NULL;
-WINDOW *drawingWindow = NULL;
 
 time_t t;
 
@@ -95,7 +92,7 @@ void buildMenuWindow()
   {
     menuWindow = newwin(height, width, (y - height) / 2, (x - width) / 2);
     keypad(menuWindow, TRUE);
-    wborder(menuWindow, '|', '|', '-', '-', '+', '+', '+', '+');
+    box(menuWindow,0,0);
     wmove(menuWindow, 1, 1);
     wprintw(menuWindow, " 1    Je prononce la lettre");
     wmove(menuWindow, 2, 1);
@@ -125,39 +122,48 @@ void buildMenuWindow()
   return;
 }
 
-void game_letter_speak()
+WINDOW *game_letter_speak()
 {
   int character = 0;
+  int x = 0;
+  int y = 0;
+  getmaxyx(stdscr, y, x);
   char str[80];
   char screen[2000];
-  if (letterSpeakWindow == NULL)
-  {
-    letterSpeakWindow = newwin(0, 0, 0, 0);
-    keypad(letterSpeakWindow, TRUE);
-  }
+  WINDOW *drawingWindow = NULL;
+  WINDOW *subDrawingWindow = NULL;
+  WINDOW *me = newwin(y, x / 2, 0, 0);
+  keypad(me, TRUE);
   while (character != KEY_HOME)
   {
-    wclear(letterSpeakWindow);
+    wclear(me);
     if (character != 0)
     {
-      writeLetterInTheCenter(letterSpeakWindow, character);
+      displayPictureForLetter(&drawingWindow,&subDrawingWindow, character, y,  x-(x / 2), 0, x / 2);
+      writeLetterInTheCenter(me, character);
+      wmove(me, 0, 0);
     }
-    buildFunctionBar(letterSpeakWindow, "Je prononce la lettre | Menu (home)");
-    wrefresh(letterSpeakWindow);
-    displayPictureForLetter(character);
+    buildFunctionBar(me, "Je prononce la lettre | Menu (home)");
+    wrefresh(me);
     if (character != 0)
     {
-      wmove(letterSpeakWindow, 0, 0);
       sprintf(str, "%c", character);
       speak(str, 80);
     }
-    character = wgetch(letterSpeakWindow);
+    character = wgetch(me);
     flushinp();
   }
-  wclear(letterSpeakWindow);
-  return;
+  wclear(subDrawingWindow);
+  wclear(drawingWindow);
+  wclear(me);
+  wrefresh(subDrawingWindow);
+  wrefresh(drawingWindow);
+  wrefresh(me);
+  delwin(subDrawingWindow);
+  delwin(drawingWindow);
+  return me;
 }
-// espeak-ng -v mb-fr2 -s50 'Appuye sur la lettre %c'"
+
 void game_guess_the_letter()
 {
   int character = 0;
@@ -168,26 +174,28 @@ void game_guess_the_letter()
   char str_for_letter[80];
   char str_for_word[80];
   char str_for_error[160];
-  if (guessLetterWindow == NULL)
-  {
-    guessLetterWindow = newwin(0, 0, 0, 0);
-    keypad(guessLetterWindow, TRUE);
-  }
+  int x = 0;
+  int y = 0;
+  WINDOW *drawingPicture = NULL;
+  WINDOW *subDrawingPicture = NULL;
+  WINDOW *me = newwin(0, 0, 0, 0);
+  getmaxyx(me, y, x);
+  keypad(me, TRUE);
   while (continue_game)
   {
-    wrefresh(guessLetterWindow);
     if (!retry)
     {
       letterNumber = rand() % 26;
       character = 'A' + letterNumber;
     }
-    displayPictureForLetter(character);
-    buildFunctionBar(guessLetterWindow, "Devine la lettre | Menu (home)");
+    displayPictureForLetter(&drawingPicture, &subDrawingPicture, character, y, x, 0, 0);
+    buildFunctionBar(drawingPicture, "Devine la lettre | Menu (home)");
+    wrefresh(drawingPicture);
     sprintf(str_for_letter, "Appuie sur la lettre %c", character);
     sprintf(str_for_word, " comme %s", words[letterNumber]);
     speak(str_for_letter, 80);
     speak(str_for_word, 80);
-    character_from_player = wgetch(guessLetterWindow);
+    character_from_player = wgetch(me);
     if (character_from_player == KEY_HOME)
     {
       continue_game = FALSE;
@@ -204,8 +212,16 @@ void game_guess_the_letter()
       retry = TRUE;
     }
     flushinp();
-    wclear(guessLetterWindow);
   };
+  wclear(me);
+  wclear(subDrawingPicture);
+  wclear(drawingPicture);
+  wrefresh(me);
+  wrefresh(subDrawingPicture);
+  wrefresh(drawingPicture);
+  delwin(subDrawingPicture);
+  delwin(drawingPicture);
+  delwin(me);
   return;
 }
 
@@ -227,7 +243,7 @@ void writeLetterInTheCenter(WINDOW *window, char character)
   int x = 0;
   int y = 0;
   getmaxyx(window, y, x);
-  draw_char(letterSpeakWindow, character, (x - 8) / 2, (y - 8) / 2);
+  draw_char(window, character, (x - 8) / 2, (y - 8) / 2);
 }
 
 void buildFunctionBar(WINDOW *window, char *text)
@@ -252,21 +268,23 @@ void buildFunctionBar(WINDOW *window, char *text)
   wattrset(window, A_NORMAL);
 }
 
-void displayPictureForLetter(char character)
+int displayPictureForLetter(WINDOW **me, WINDOW **sub, char character, int height, int width, int begin_y, int begin_x)
 {
-  int width = 40;
-  int height = 25;
-  int y = 0;
-  int x = 0;
+  int draw_width = 40;
+  int draw_height = 25;
   int tmp = 0;
   char drawing[1025];
   char fileName[256];
-  if (drawingWindow == NULL)
+  int maxX = 0;
+  int maxY = 0;
+  if (*me == NULL)
   {
-    getmaxyx(stdscr, y, x);
-    drawingWindow = newwin(height, width, (y - height) / 2, (x - 2 - width));
+    *me = newwin(height, width, begin_y, begin_x);
+    getmaxyx(*me, maxY, maxX);
+    *sub = derwin(*me, draw_height, draw_width, (maxY - draw_height) / 2, (maxX - draw_width) / 2);
   }
-  wclear(drawingWindow);
+  wclear(*me);
+  wclear(*sub);
   int lowerCase = tolower(character);
   switch (lowerCase)
   {
@@ -351,7 +369,7 @@ void displayPictureForLetter(char character)
   default:
     strncpy(fileName, "data/other.txt", sizeof(fileName));
   }
-  
+
   FILE *fptr = fopen(fileName, "r");
   if (fptr != NULL)
   {
@@ -360,9 +378,10 @@ void displayPictureForLetter(char character)
       tmp = fgetc(fptr);
       if (tmp != '\n')
       {
-        waddch(drawingWindow, tmp);
+        waddch(*sub, tmp);
       }
     }
   }
-  wrefresh(drawingWindow);
+  wrefresh(*me);
+  return 0;
 }
