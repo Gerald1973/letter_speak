@@ -73,7 +73,6 @@ int main(void)
   start_color();
   bool hasColors = has_colors();
   bool canChangeColor = can_change_color();
-  int character = 0;
   printw("The terminal has color        : %d \n", hasColors);
   printw("The user can modify the color : %d \n", canChangeColor);
   buildMenuWindow();
@@ -131,7 +130,6 @@ WINDOW *game_letter_speak()
   int y = 0;
   getmaxyx(stdscr, y, x);
   char str[80];
-  char screen[2000];
   WINDOW *drawingWindow = NULL;
   WINDOW *subDrawingWindow = NULL;
   WINDOW *me = newwin(y, x / 2, 0, 0);
@@ -283,7 +281,6 @@ int displayPictureForLetter(WINDOW **me, WINDOW **sub, char character, int heigh
   int draw_width = 40;
   int draw_height = 25;
   int tmp = 0;
-  char drawing[1025];
   char fileName[256];
   int maxX = 0;
   int maxY = 0;
