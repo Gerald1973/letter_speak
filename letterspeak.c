@@ -126,6 +126,7 @@ void buildMenuWindow()
 WINDOW *game_letter_speak()
 {
   int character = 0;
+  int upperCharacter = 0;
   int x = 0;
   int y = 0;
   getmaxyx(stdscr, y, x);
@@ -140,6 +141,7 @@ WINDOW *game_letter_speak()
     wclear(me);
     if (character != 0)
     {
+      upperCharacter = toupper(character);
       displayPictureForLetter(&drawingWindow, &subDrawingWindow, character, y, x - (x / 2), 0, x / 2);
       writeLetterInTheCenter(me, character);
       wmove(me, 0, 0);
@@ -150,6 +152,11 @@ WINDOW *game_letter_speak()
     {
       sprintf(str, "%c", character);
       speak(str, 80);
+      if (upperCharacter >= 'A' && upperCharacter <= 'Z')
+      {
+        sprintf(str, "comme %s", words[upperCharacter - 'A']);
+        speak(str, 80);
+      }
     }
     character = wgetch(me);
     flushinp();
@@ -181,7 +188,7 @@ void game_guess_the_letter()
   WINDOW *subDrawingPicture = NULL;
   WINDOW *me = NULL;
   getmaxyx(stdscr, y, x);
-  me = newwin(2, x, y-2, 0);
+  me = newwin(2, x, y - 2, 0);
   keypad(me, TRUE);
   while (continue_game)
   {
@@ -192,7 +199,7 @@ void game_guess_the_letter()
     }
     buildFunctionBar(me, "Devine la lettre | Menu (home)");
     displayPictureForLetter(&drawingPicture, &subDrawingPicture, character, y - 2, x, 0, 0);
-    wrefresh(me); 
+    wrefresh(me);
     sprintf(str_for_letter, "Appuie sur la lettre %c", character);
     sprintf(str_for_word, " comme %s", words[letterNumber]);
     speak(str_for_letter, 80);
@@ -232,7 +239,7 @@ int speak(char *text, int rate)
   espeak_SetParameter(espeakRATE, rate, 0);
   espeak_SetParameter(espeakVOICETYPE, 1, 0);
   espeak_SetParameter(espeakVOLUME, 100, 0);
-   espeak_SetParameter(espeakPITCH, 60,0);
+  espeak_SetParameter(espeakPITCH, 60, 0);
   espeak_VOICE voice;
   memset(&voice, 0, sizeof(espeak_VOICE)); // Zero out the voice first
   voice.identifier = "mb-fr4";
