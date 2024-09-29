@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=LetterSpeak
+Type=Application
+Comment=Aprrendre les lettres
+Categories=Application
+Path=/home/louis/git/letter_speak
+Exec=lxterminal --geometry=100x40 -e /home/louis/git/letter_speak/letterspeak
+Terminal=false
+StartupNotify=false
+Icon=/home/louis/git/letter_speak/icon.png
